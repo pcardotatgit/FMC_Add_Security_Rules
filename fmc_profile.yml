@@ -1,0 +1,8 @@
+---
+FMC_Server:
+  - hostname: FMC
+    ipaddr:   192.168.100.15
+    port: 443
+    username: apiuser
+    password: Cisco123
+    version: 1
