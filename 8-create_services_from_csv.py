@@ -18,7 +18,7 @@ or implied.
 
 what is it :
 	This script add all service objects from the service_objects.csv file
-
+v20200428
 '''
 import sys
 import csv
@@ -176,11 +176,12 @@ if __name__ == "__main__":
 			print (objet)
 			sent_objects_list.append(objet)
 			if i==max_objects:
-				print(yellow("SEND HOSTS TO DEVICE",bold=True))
+				print(yellow("SEND SINGLE SERVICE TO DEVICE",bold=True))
 				fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 				i=0
 			i+=1		
 		if i<max_objects-1:
+			print(yellow("SEND SINGLE SERVICE TO DEVICE",bold=True))
 			fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 	print('======================================================================================================================================')	
 	print(green("OK ALL DONE",bold=True))

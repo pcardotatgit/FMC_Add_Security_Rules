@@ -18,7 +18,7 @@ or implied.
 
 
 This script add all network objects from the network_objects.csv file
-
+v20200428
 '''
 import sys
 import csv
@@ -97,7 +97,7 @@ def fmc_post(host,port,token,UUID,url,version,post_data,username,password):
 			#print(json.dumps(json_resp,sort_keys=True,indent=4, separators=(',', ': ')))
 		else :
 			r.raise_for_status()
-			print ("Error occurred in POST --> "+resp)
+			print (red("Error occurred in POST --> "+resp),bold=True)
 	except requests.exceptions.HTTPError as err:
 		print ("Error in connection --> "+str(err))
 	finally:
@@ -157,13 +157,17 @@ def read_csv(file):
 				networks.append(payload)
 			elif row[1]=='range':
 				#new_adress=convert_mask(row[2])
-				payload = {
-					"name":row[0],
-					"description":row[3],
-					"type":"Range",
-					"value":row[2]
-				}	
-				ranges.append(payload)
+				values=row[2].split("-")
+				if values[0] != values[1]:
+					payload = {
+						"name":row[0],
+						"description":row[3],
+						"type":"Range",
+						"value":row[2]
+					}	
+					ranges.append(payload)
+				else:
+					print(red("Bad Range {} : start ip = end ip ".format(row[0]),bold=True))
 				
 	objects={
 	"fqdns":fqdns,
@@ -208,7 +212,7 @@ if __name__ == "__main__":
 	print('======================================================================================================================================')	
 	#print(objects_list['hosts'])
 	if not objects_list['hosts']:
-		print(red("NO HOSTS TO DEVICE",bold=True))
+		print(red("NO HOSTS TO SEND TO DEVICE",bold=True))
 	else:
 		api_url="/object/hosts?bulk=true"
 		i=0
@@ -220,13 +224,15 @@ if __name__ == "__main__":
 				print(yellow("SEND HOSTS TO DEVICE",bold=True))
 				fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 				i=0
+				objects_list.clear()
 			i+=1		
 		if i<max_objects-1:
+			print(yellow("SEND HOSTS TO DEVICE (2)",bold=True))
 			fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 	print('======================================================================================================================================')		
 	#print(objects_list['networks'])
 	if not objects_list['networks']:
-		print(red("NO NETWORS TO DEVICE",bold=True))
+		print(red("NO NETWORS TO SEND TO DEVICE",bold=True))
 	else:	
 		i=0
 		api_url="/object/networks?bulk=true"
@@ -238,8 +244,10 @@ if __name__ == "__main__":
 				print(yellow("SEND NETWORKS TO DEVICE",bold=True))
 				fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 				i=0
+				objects_list.clear()
 			i+=1
 		if i<max_objects-1:
+			print(yellow("SEND HOSTS TO DEVICE (2)",bold=True))
 			fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 	print('======================================================================================================================================')		
 	#print(objects_list['fqdns'])
@@ -253,11 +261,13 @@ if __name__ == "__main__":
 			print (objet)
 			sent_objects_list.append(objet)
 			if i==max_objects:
-				print(yellow("SEND FQDNS TO DEVICE",bold=True))
+				print(yellow("SEND FQDNS TO SEND TO DEVICE",bold=True))
 				fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 				i=0
+				objects_list.clear()
 			i+=1
 		if i<max_objects-1:
+			print(yellow("SEND HOSTS TO DEVICE (2)",bold=True))
 			fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 	print('======================================================================================================================================')	
 	print(objects_list['ranges'])
@@ -266,15 +276,18 @@ if __name__ == "__main__":
 	else:	
 		api_url="/object/ranges?bulk=true"
 		i=0
+		sent_objects_list=[]
 		for objet in objects_list['ranges']:
 			print (objet)
 			sent_objects_list.append(objet)
 			if i==max_objects:
-				print(yellow("SEND RANGES TO DEVICE",bold=True))
+				print(yellow("SEND RANGES TO SEND TO DEVICE",bold=True))
 				fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 				i=0
+				objects_list.clear()
 			i+=1
 		if i<max_objects-1:
+			print(yellow("SEND RANGES TO DEVICE (2)",bold=True))
 			fmc_post(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,sent_objects_list,FMC_USER,FMC_PASSWORD )
 	print('======================================================================================================================================')	
 	print(green("OK ALL DONE",bold=True))

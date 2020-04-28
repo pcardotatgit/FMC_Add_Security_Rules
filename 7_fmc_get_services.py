@@ -18,7 +18,7 @@ or implied.
 
 This script	displays and save into network_objects.txt file all network objects 
 except  any-ipv4 and any-ipv6
-
+v20200428
 '''
 import requests
 import json
@@ -77,7 +77,7 @@ def fmc_get(host,port,token,UUID,url,version,username,password):
 	}
 
 	try:
-		request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&limit=100".format(host, port,version,UUID,url),verify=False, headers=headers)
+		request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&limit=1000".format(host, port,version,UUID,url),verify=False, headers=headers)
 		status_code = request.status_code		
 		print("Status code is: "+str(status_code))
 		if status_code == 401: 
@@ -89,7 +89,7 @@ def fmc_get(host,port,token,UUID,url,version,username,password):
 						line_content.append(line.strip())						
 			auth_token = line_content[0]
 			headers['X-auth-access-token']=auth_token			
-			request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&limit=100".format(host, port,version,UUID,url),verify=False, headers=headers)
+			request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&limit=1000".format(host, port,version,UUID,url),verify=False, headers=headers)
 			status_code = request.status_code
 		resp = request.text
 		if status_code == 200 or status_code == 201 or status_code == 202:
@@ -135,29 +135,33 @@ if __name__ == "__main__":
 		output=json.dumps(objets,indent=4,sort_keys=True)
 		#print(output)
 		#fa.write(output)	
-		for line in objets['items']:
-			print('name:', line['name'])
-			#print(line['objects'])
-			#for line2 in line['objects']:		
-			#	print('==',line2['name'])
-			print('description:', line['description'])
-			print('type:', line['type'])
-			print('id:', line['id'])
-			print()
-			if "-description-" in line['description']:
-				fa.write(line['name'])
-				fa.write(';')
-				fa.write(' OBJECT LIST')				
-				fa.write(';')   
-				if line['description']==None:
-					line['description']="No Description"
-				fa.write(line['description'])
-				fa.write(';')			
-				fa.write(line['type'])
-				fa.write(';')
-				fa.write(line['id'])
-				fa.write('\n')		
-	
+		if objets.get('items'):
+			for line in objets['items']:
+				print('name:', line['name'])
+				#print(line['objects'])
+				#for line2 in line['objects']:		
+				#	print('==',line2['name'])
+				print('description:', line['description'])
+				print('type:', line['type'])
+				print('id:', line['id'])
+				print()
+				if ("-description-" in line['description']) or ("S_" in line['name']):
+					fa.write(line['name'])
+					fa.write(';')
+					fa.write('objects_group')				
+					fa.write(';')   
+					if line['description']==None:
+						line['description']="No Description"
+					fa.write(line['description'])
+					#fa.write(';')			
+					#fa.write(line['type'])
+					fa.write(';')
+					fa.write(line['id'])
+					fa.write(';')			
+					fa.write(line['type'])				
+					fa.write('\n')						
+		else:
+			print(red("NO SERVICE GROUPS FOUND"))
 	go=1
 	if go==1:
 		# List Network Addesses Objects ( host and ip addresses )
@@ -178,20 +182,29 @@ if __name__ == "__main__":
 			print('description:', line['description'])
 			print('type:', type)
 			print('id:', line['id'])
-			print()
-			if "-description-" in line['description']:
+			
+			if line['metadata'].get('readOnly'):
+				if line['metadata']['readOnly'].get('reason'):
+					print(red('THIS IS A SYSTEM OBJECT'))					
+			else:
+				print(green('KEEP THIS ONE'))
 				fa.write(line['name'])
 				fa.write(';')		
 				fa.write(type)
 				fa.write(';')				
 				fa.write(line['port'])
+				'''
 				fa.write(';')   
 				if line['description']==None:
 					line['description']="No Description"
 				fa.write(line['description'])
+				'''
 				fa.write(';')			
 				fa.write(line['id'])
-				fa.write('\n')				
+				fa.write(';')			
+				fa.write(line['type'])					
+				fa.write('\n')	
+			print()				
 	fa.close()				
 	
 	

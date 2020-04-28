@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Copyright (c) 2020 Cisco and/or its affiliates.
+Copyright (c) 2019 Cisco and/or its affiliates.
 
 This software is licensed to you under the terms of the Cisco Sample
 Code License, Version 1.1 (the "License"). You may obtain a copy of the
@@ -18,7 +18,7 @@ or implied.
 
 This script	displays and save into network_objects.txt file all network objects 
 except  any-ipv4 and any-ipv6
-
+v20200428
 '''
 import requests
 import json
@@ -77,7 +77,7 @@ def fmc_get(host,port,token,UUID,url,version,username,password):
 	}
 
 	try:
-		request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&limit=100".format(host, port,version,UUID,url),verify=False, headers=headers)
+		request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&limit=2000".format(host, port,version,UUID,url),verify=False, headers=headers)
 		status_code = request.status_code		
 		print("Status code is: "+str(status_code))
 		if status_code == 401: 
@@ -89,7 +89,7 @@ def fmc_get(host,port,token,UUID,url,version,username,password):
 						line_content.append(line.strip())						
 			auth_token = line_content[0]
 			headers['X-auth-access-token']=auth_token			
-			request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&limit=100".format(host, port,version,UUID,url),verify=False, headers=headers)
+			request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&limit=2000".format(host, port,version,UUID,url),verify=False, headers=headers)
 			status_code = request.status_code
 		resp = request.text
 		if status_code == 200 or status_code == 201 or status_code == 202:
@@ -136,15 +136,17 @@ if __name__ == "__main__":
 		#print(output)
 		#fa.write(output)	
 		for line in objets['items']:
-			print('name:', line['name'])
-			#print(line['objects'])
-			#for line2 in line['objects']:		
-			#	print('==',line2['name'])
-			print('description:', line['description'])
-			print('type:', line['type'])
-			print('id:', line['id'])
-			print()
-			if ("IPv4-" not in line['name']) and ("IPv6-" not in line['name']) and ("any-ipv" not in line['name']) and (line['name']!="any"):
+			if line['metadata'].get('readOnly'):
+				print(red('THIS IS A SYSTEM OBJECT'))					
+			else:			
+				print('name:', line['name'])
+				#print(line['objects'])
+				#for line2 in line['objects']:		
+				#	print('==',line2['name'])
+				print('description:', line['description'])
+				print('type:', line['type'])
+				print('id:', line['id'])
+				print()			
 				fa.write(line['name'])
 				fa.write(';')
 				fa.write(' OBJECT LIST')				
@@ -168,13 +170,16 @@ if __name__ == "__main__":
 		#print(output)
 		#fa.write(output)	
 		for line in objets['items']:
-			print('name:', line['name'])
-			print('value:', line['value'])
-			print('description:', line['description'])
-			print('type:', line['type'])
-			print('id:', line['id'])
-			print()
-			if ("IPv4-" not in line['name']) and ("IPv6-" not in line['name']) and ("any-ipv" not in line['name']):
+			if line['metadata'].get('readOnly'):
+				if line['metadata']['readOnly'].get('reason'):
+					print(red('THIS IS A SYSTEM OBJECT'))					
+			else:		
+				print('name:', line['name'])
+				print('value:', line['value'])
+				print('description:', line['description'])
+				print('type:', line['type'])
+				print('id:', line['id'])
+				print()			
 				fa.write(line['name'])
 				fa.write(';')			
 				fa.write(line['value'])
@@ -187,122 +192,7 @@ if __name__ == "__main__":
 				fa.write(';')
 				fa.write(line['id'])
 				fa.write('\n')		
-	'''		
-	# List Network Addesses Objects ( host and ip addresses )
-	api_url="/object/ranges"
-	objets = fmc_get(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION)
-	# save json output
-	output=json.dumps(objets,indent=4,sort_keys=True)
-	#print(output)
-	#fa.write(output)	
-	for line in objets['items']:
-		print('name:', line['name'])
-		print('value:', line['value'])
-		print('description:', line['description'])
-		print('type:', line['type'])
-		print('id:', line['id'])
-		print()
-		if ("utsideIPv4" not in line['name']) and ("ny-ipv" not in line['name']):
-			fa.write(line['name'])
-			fa.write(';')			
-			fa.write(line['value'])
-			fa.write(';')   
-			if line['description']==None:
-				line['description']="No Description"
-			fa.write(line['description'])
-			fa.write(';')			
-			fa.write(line['type'])
-			fa.write(';')
-			fa.write(line['id'])
-			fa.write('\n')
-	'''			
-	'''
-	# List Network Objects Groups
-	api_url="/object/networkgroups"
-	objets = fmc_get(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION)
-	# save json output
-	output=json.dumps(objets,indent=4,sort_keys=True)
-	print(output)
-	fa.write(output)	
-	for line in objets['items']:
-		print('name:', line['name'])
-		print('value:', line['value'])
-		print('description:', line['description'])
-		print('type:', line['type'])
-		print('id:', line['id'])
-		print()
-		if ("utsideIPv4" not in line['name']) and ("ny-ipv" not in line['name']):
-			fa.write(line['name'])
-			fa.write(';')			
-			fa.write(line['value'])
-			fa.write(';')   
-			if line['description']==None:
-				line['description']="No Description"
-			fa.write(line['description'])
-			fa.write(';')			
-			fa.write(line['type'])
-			fa.write(';')
-			fa.write(line['id'])
-			fa.write('\n')		
-	'''		
-	'''
-	# List Network Host Objects
-	api_url="/object/hosts"
-	objets = fmc_get(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION)
-	# save json output
-	output=json.dumps(objets,indent=4,sort_keys=True)
-	#print(output)
-	#fa.write(output)	
-	for line in objets['items']:
-		print('name:', line['name'])
-		print('value:', line['value'])
-		print('description:', line['description'])
-		print('type:', line['type'])
-		print('id:', line['id'])
-		print()
-		if ("utsideIPv4" not in line['name']) and ("ny-ipv" not in line['name']):
-			fa.write(line['name'])
-			fa.write(';')			
-			fa.write(line['value'])
-			fa.write(';')   
-			if line['description']==None:
-				line['description']="No Description"
-			fa.write(line['description'])
-			fa.write(';')			
-			fa.write(line['type'])
-			fa.write(';')
-			fa.write(line['id'])
-			fa.write('\n')		
-	'''
-	'''
-	# List Network Objects
-	api_url="/object/networks"
-	objets = fmc_get(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION)
-	# save json output
-	output=json.dumps(objets,indent=4,sort_keys=True)
-	#print(output)
-	#fa.write(output)	
-	for line in objets['items']:
-		print('name:', line['name'])
-		print('value:', line['value'])
-		print('description:', line['description'])
-		print('type:', line['type'])
-		print('id:', line['id'])
-		print()
-		if ("utsideIPv4" not in line['name']) and ("ny-ipv" not in line['name']):
-			fa.write(line['name'])
-			fa.write(';')			
-			fa.write(line['value'])
-			fa.write(';')   
-			if line['description']==None:
-				line['description']="No Description"
-			fa.write(line['description'])
-			fa.write(';')			
-			fa.write(line['type'])
-			fa.write(';')
-			fa.write(line['id'])
-			fa.write('\n')	
-	'''			
+	
 	fa.close()				
 	
 	

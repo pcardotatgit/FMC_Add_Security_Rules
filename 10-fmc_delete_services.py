@@ -17,8 +17,7 @@ IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied.
 
 this script delete all network object with names contained in the output_network_objects.txt file
-	
-	
+v20200428
 '''
 import requests
 import json
@@ -79,16 +78,20 @@ def delete_network_from_csv(host,port,token,UUID,version,file,username,password)
 		for row in entries:
 			#print (' print the all row  : ' + row)
 			#print ( ' print only some columuns in the rows  : '+row[1]+ ' -> ' + row[2] )	
-			#print(row[0]+' : '+row[3]+'-'+row[4])
+			#print(row[0]+' : '+row[3]+'-'+row[3])
+			if row[1]=='objects_group':
+				object_type='portobjectgroups'
+			else:
+				object_type='protocolportobjects'
 			try:
-				request = requests.delete("https://{}:{}/api/fmc_config/v{}/domain/{}/object/protocolportobjects/{}".format(host, port,version,UUID,row[4]), headers=headers, verify=False)		
+				request = requests.delete("https://{}:{}/api/fmc_config/v{}/domain/{}/object/{}/{}".format(host, port,version,UUID,object_type,row[3]), headers=headers, verify=False)		
 				status_code = request.status_code
 				resp = request.text
 				print("Status code is: "+str(status_code))				
 				if (status_code == 429):
 					print(red("API is currently being rate-limited by FMC. Pausing for 60 seconds.",bold=True))
 					time.sleep(60)
-					request = requests.delete("https://{}:{}/api/fmc_config/v{}/domain/{}/object/protocolportobjects/{}".format(host, port,version,UUID,row[4]), headers=headers, verify=False)
+					request = requests.delete("https://{}:{}/api/fmc_config/v{}/domain/{}/object/{}/{}".format(host, port,version,UUID,object_type,row[3]), headers=headers, verify=False)
 					status_code = request.status_code		
 				if status_code == 401: 
 					generate_fmc_token(host,port,username,password,version)	
@@ -99,17 +102,17 @@ def delete_network_from_csv(host,port,token,UUID,version,file,username,password)
 								line_content.append(line.strip())						
 					auth_token = line_content[0]
 					headers['X-auth-access-token']=auth_token			
-					request = requests.delete("https://{}:{}/api/fmc_config/v{}/domain/{}/object/protocolportobjects/{}".format(host, port,version,UUID,row[4]), headers=headers, verify=False)
+					request = requests.delete("https://{}:{}/api/fmc_config/v{}/domain/{}/object/{}/{}".format(host, port,version,UUID,object_type,row[3]), headers=headers, verify=False)
 					status_code = request.status_code
 					
-				if status_code == 200 or status_code == 202:
+				if status_code == 200 or status_code == 201 or status_code == 202:
 					print ("     Delete was successful...")
 					#json_resp = json.loads(resp)
 					#print(json.dumps(json_resp,sort_keys=True,indent=4, separators=(',', ': ')))
 				else :
 					request.raise_for_status()
 					print ("Error occurred in DELETE --> "+resp)				
-				print(green("Object : {} - {} - {} Deleted".format(row[3],row[0],row[4]),bold=True))			
+				print(green("Object : {} - {} - {} Deleted".format(row[3],row[0],row[3]),bold=True))			
 			except:
 				raise
 			#time.sleep(0.5)
@@ -145,9 +148,10 @@ if __name__ == "__main__":
 	print('======================================================================================================================================')	 
 	api_url="/object/hosts"
 	csvfile="output_service_objects.txt"
-	print("OBJECTS TO DELETE :")
+	print("DELETE SERVICE OBJECTS:")
 	delete_network_from_csv(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,FMC_VERSION,csvfile,FMC_USER,FMC_PASSWORD)
 	#print(json.dumps(networks,indent=4,sort_keys=True))
+	print(green("ALL DONE"))
 		   
 	
 	
