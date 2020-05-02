@@ -32,6 +32,9 @@ from pprint import pprint, pformat
 from pathlib import Path
 from crayons import blue, green, white, red, yellow,magenta, cyan
 
+new_auth_token=[]#as global variable in order to make it easily updatable 
+new_auth_token.append("zzz") 
+
 def yaml_load(filename):
 	fh = open(filename, "r")
 	yamlrawtext = fh.read()
@@ -64,6 +67,7 @@ def generate_fmc_token(host,port,username,password,version):
 	fh.write("\r\n")
 	fh.write(DOMAIN_UUID)
 	fh.close() 
+	new_auth_token[0]=auth_token
 	print (green("Token = "+auth_token))
 	print(green("DOMAIN_UUID="+DOMAIN_UUID))
 	print("Saved into token.txt file")
@@ -227,7 +231,7 @@ if __name__ == "__main__":
 				
 	auth_token = line_content[0]
 	DOMAIN_UUID = line_content[1]	
-			
+	new_auth_token[0]=auth_token		
 	print ('auth_token :',auth_token)
 	print ('UUID : ',DOMAIN_UUID)
 	print('======================================================================================================================================')	 

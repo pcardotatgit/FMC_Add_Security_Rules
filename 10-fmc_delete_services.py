@@ -17,7 +17,8 @@ IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied.
 
 this script delete all network object with names contained in the output_network_objects.txt file
-v20200428
+	
+	
 '''
 import requests
 import json
