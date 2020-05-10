@@ -37,7 +37,63 @@ def fmc_post(host,port,token,UUID,url,version,post_data):
 	    # REST call with SSL verification turned on:
 	    # r = requests.post(url, data=json.dumps(post_data), headers=headers, verify='/path/to/ssl_certificate')
 	    status_code = r.status_code
-	    resp = r.text
+		print("Status code is (1): "+str(status_code))
+		if (status_code == 429):
+			print(cyan(" Let's Wait 60 Sec ! before sending again JSON Data to FMC"))
+			print(cyan(" Too many requests were sent to the API. This error will occur if you send more than 120 requests per minute."))
+			print(cyan(" Too many concurrent requests. The system cannot accept more than 10 parallel requests from all clients."))
+			print(cyan(" Too many write operations per server. The API will only allow one PUT, POST, or DELETE request per user on a server at a time. "))
+			time.sleep(60)
+			# Send again data to FMC
+			r = requests.post(url, data=json.dumps(post_data), headers=headers, verify=False)
+			status_code = r.status_code			
+		if status_code == 422: 
+			print(red("Something is wrong into JSON Data sent to FMC - check values. open error.log",bold=True))	
+			print(red("Let's exit in order to debug Data",bold=True))
+			print(cyan("Remark ",bold=True))
+			print(cyan("The payload is too large. This will occur when you send a payload greater than 2048000 bytes."))
+			print(cyan("The payload contains an unprocessable or unreadable entity such as a invalid attribut name or incorrect JSON syntax."))
+			resp = r.text			
+			print (red("Error occurred in POST --> "+resp,bold=True))
+			fh = open("error.log", "a+")
+			fh.write(resp)
+			fh.write("\n")			
+			fh.write("=========================================")
+			fh.write("\n")
+			fh.write(json.dumps(post_data,indent=4,sort_keys=True))
+			fh.close()
+			sys.exit()		
+		if status_code == 400: 
+			print(red("Something is wrong into JSON Data sent to FMC - check values. open error.log",bold=True))	
+			print(red("Let's exit in order to debug Data",bold=True))
+			print(cyan("Remark ",bold=True))
+			print(cyan(" This kind of error could be due to a forbiden character into a name. For example the space characater. It is better to replace spaces by underscores.  Or forbiden syntax in the values. For example if you try to create a range with Start which is less than the End. Then you will have an error. you will have an error as well if you try to create an object wich already exists"))
+			print(cyan(" An error could occur as well with anygood reason !  Then just try to run again the script and check if it fails at the same Data after a few tries. If so, then debug the Data.  But you will be probably able to the Data which previously failed !"))
+			print(cyan(" This script will automatically restart from the last object you created in the previous try"))
+			print(cyan(" Then you can launch the script several times until all your object are created"))
+			resp = r.text			
+			print (red("Error occurred in POST --> "+resp,bold=True))
+			fh = open("error.log", "a+")
+			fh.write(resp)
+			fh.write("\n")			
+			fh.write("=========================================")
+			fh.write("\n")
+			fh.write(json.dumps(post_data,indent=4,sort_keys=True))
+			fh.close()			
+			sys.exit()			
+		if status_code == 401: 
+			print("Let's ask for a new token")
+			generate_fmc_token(host,port,username,password,version)	
+			line_content = []
+			with open('token.txt') as inputfile:
+				for line in inputfile:
+					if line.strip()!="":	
+						line_content.append(line.strip())						
+			auth_token = line_content[0]
+			headers['X-auth-access-token']=auth_token			
+			r = requests.post(url, data=json.dumps(post_data), headers=headers, verify=False)
+			status_code = r.status_code			
+		resp = r.text		
 	    print("Status code is: "+str(status_code))
 	    if status_code == 201 or status_code == 202:
 	        print ("Post was successful...")

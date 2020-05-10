@@ -127,6 +127,31 @@ def fmc_post(host,port,token,UUID,url,version,post_data,username,password):
 		# r = requests.post(url, data=json.dumps(post_data), headers=headers, verify='/path/to/ssl_certificate')
 		status_code = r.status_code		
 		print("Status code is (2): "+str(status_code))
+		if (status_code == 429):
+			print(cyan(" Let's Wait 60 Sec ! before sending again JSON Data to FMC"))
+			print(cyan(" Too many requests were sent to the API. This error will occur if you send more than 120 requests per minute."))
+			print(cyan(" Too many concurrent requests. The system cannot accept more than 10 parallel requests from all clients."))
+			print(cyan(" Too many write operations per server. The API will only allow one PUT, POST, or DELETE request per user on a server at a time. "))
+			time.sleep(60)
+			# Send again data to FMC
+			r = requests.post(url, data=json.dumps(post_data), headers=headers, verify=False)
+			status_code = r.status_code			
+		if status_code == 422: 
+			print(red("Something is wrong into JSON Data sent to FMC - check values. open error.log",bold=True))	
+			print(red("Let's exit in order to debug Data",bold=True))
+			print(cyan("Remark ",bold=True))
+			print(cyan("The payload is too large. This will occur when you send a payload greater than 2048000 bytes."))
+			print(cyan("The payload contains an unprocessable or unreadable entity such as a invalid attribut name or incorrect JSON syntax."))
+			resp = r.text			
+			print (red("Error occurred in POST --> "+resp,bold=True))
+			fh = open("error.log", "a+")
+			fh.write(resp)
+			fh.write("\n")			
+			fh.write("=========================================")
+			fh.write("\n")
+			fh.write(json.dumps(post_data,indent=4,sort_keys=True))
+			fh.close()
+			sys.exit()					
 		if status_code == 400: 
 			print(red("Something is wrong into JSON Data sent to FMC - check values. open error.log",bold=True))	
 			print(red("Let's exit in order to debug Data",bold=True))

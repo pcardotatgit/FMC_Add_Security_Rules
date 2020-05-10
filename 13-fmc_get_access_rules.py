@@ -16,8 +16,8 @@ writing, software distributed under the License is distributed on an "AS
 IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied.
 
-This script	displays and save into network_objects.txt file all network objects 
-except  any-ipv4 and any-ipv6
+This script	displays and save into the output_access_rules.txt file all existing access rules 
+except system rules
 
 '''
 import requests
@@ -30,9 +30,11 @@ from pprint import pprint, pformat
 from pathlib import Path
 from crayons import blue, green, white, red, yellow,magenta, cyan
 
+acp_name="PAT_Access_Control_Policy"
 limit=10000 # number of object to retreive in one object request
-new_auth_token=[]#as global variable in order to make it easily updatable 
+new_auth_token=[] #as global variable in order to make it easily updatable 
 new_auth_token.append("zzz") 
+
 
 def yaml_load(filename):
 	fh = open(filename, "r")
@@ -84,7 +86,7 @@ def fmc_get(host,port,token,UUID,url,version,username,password,offset):
 	try:
 		request = requests.get("https://{}:{}/api/fmc_config/v{}/domain/{}{}?expanded=true&offset={}&limit={}".format(host, port,version,UUID,url,offset,limit),verify=False, headers=headers)
 		status_code = request.status_code		
-		print("Status code is: "+str(status_code))	
+		print("Status code is: "+str(status_code))
 		if status_code == 401: 
 			generate_fmc_token(host,port,username,password,version)	
 			line_content = []
@@ -127,114 +129,96 @@ if __name__ == "__main__":
 	auth_token = line_content[0]
 	DOMAIN_UUID = line_content[1]	
 	new_auth_token[0]=auth_token
-	
 	print ('auth_token :',auth_token)
 	print ('UUID : ',DOMAIN_UUID)
-	print('================================================================================================')	
-	fa = open("output_network_objects.txt","w")  
+	
+	print('==========================================================================================')	
+	print(yellow("Step - 1 : Get ACP ID for acp : {}".format(acp_name),bold=True))			
 	go=1
 	offset=0
-	
-	while go==1:			
-		# List Network Groups
-		api_url="/object/networkgroups"
+	ii=0	
+	while go==1:
+		# List Network Addesses Objects ( host and ip addresses )
+		auth_token=new_auth_token[0]
+		api_url="/policy/accesspolicies"
 		objets = fmc_get(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,FMC_USER,FMC_PASSWORD,offset)
 		# save json output
 		#output=json.dumps(objets,indent=4,sort_keys=True)
 		#print(output)
 		#fa.write(output)
-		if objets.get('items'):	
-			ii=0
-			for line in objets['items']:
-				ii+=1
-				if line['metadata'].get('readOnly'):
-					print(red('THIS IS A SYSTEM OBJECT'))					
-				else:			
-					print('name:', line['name'])
-					#print(line['objects'])
-					#for line2 in line['objects']:		
-					#	print('==',line2['name'])
-					print('description:', line['description'])
-					print('type:', line['type'])
-					print('id:', line['id'])
-					print()		
-					condition=1
-					#check here for a condition to save result				
-					if condition==1:
-						fa.write(line['name'])
-						fa.write(';')
-						fa.write(' OBJECT LIST')				
-						fa.write(';')   
-						if line['description']==None:
-							line['description']="No Description"
-						fa.write(line['description'])
-						fa.write(';')			
-						fa.write(line['type'])
-						fa.write(';')
-						fa.write(line['id'])
-						fa.write('\n')
-		else:
-			print(red("NO NETWORK GROUPS FOUND"))
-			
-		if ii>=999:
-			go=1
-			offset+=ii-1
-		else:
-			go=0					
-	offset=0	
-	go=1
-	while go==1:
-		# List Network Addesses Objects ( host and ip addresses and ranges )
-		auth_token=new_auth_token[0]
-		api_url="/object/networkaddresses"
-		objets = fmc_get(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,FMC_USER,FMC_PASSWORD,offset)
-		# save json output
-		#output=json.dumps(objets,indent=4,sort_keys=True)
-		#print(output)
-		#fa.write(output)	
 		if objets.get('items'):
 			ii=0
 			for line in objets['items']:
 				ii+=1
-				if line['metadata'].get('readOnly'):
-					if line['metadata']['readOnly'].get('reason'):
-						print(red('THIS IS A SYSTEM OBJECT'))					
-				else:				
-					print('name:', line['name'])
-					print('value:', line['value'])
-					print('description:', line['description'])
-					print('type:', line['type'])
-					print('id:', line['id'])
-					print('Nb:', str(ii))
-					print()		
-					condition=1
-					#check here for a condition to save result
-					if "N_range" not in line['name']:
-						condition=0
-					condition=1
-					if condition==1:
-						fa.write(line['name'])
-						fa.write(';')			
-						fa.write(line['value'])
-						fa.write(';')   
-						if line['description']==None:
-							line['description']="No Description"
-						fa.write(line['description'])
-						fa.write(';')			
-						fa.write(line['type'])
-						fa.write(';')
-						fa.write(line['id'])
-						fa.write('\n')	
+				condition=0
+				#check here for a condition to save result	
+				if acp_name == line['name']:
+					condition=1		
+				if condition==1:	
+					print('name:', line['name'],' id = ',line['id'])	
+					print(green('KEEP THIS ONE'))
+					acp_id=line['id']
 		else:
-			print(red("NO NETWORK GROUPS FOUND"))					
+			print(red("NO ACP FOUND"))					
 		if ii>=999:
 			go=1
 			offset+=ii-1
 		else:
-			go=0
-	
-	fa.close()	
-	print('================================================================================================')		
-	print(cyan("ALL DONE . The result is in output_network_objects.txt file",bold=True))
+			go=0		
+	print(yellow("Step - 1 : OK DONE"))			
+	print()			
+	print('==========================================================================================')	
+	print(yellow("Step - 2 : Get all security rules for acp : {}".format(acp_name),bold=True))	
+	fa = open("output_access_rules.txt","w")   			
+	go=1
+	offset=0
+	ii=0	
+	while go==1:
+		# List Network Addesses Objects ( host and ip addresses )
+		auth_token=new_auth_token[0]
+		api_url="/policy/accesspolicies/"+acp_id+"/accessrules"
+		#print("api_url",api_url)
+		objets = fmc_get(FMC_IPADDR,FMC_PORT,auth_token,DOMAIN_UUID,api_url,FMC_VERSION,FMC_USER,FMC_PASSWORD,offset)
+		# save json output
+		output=json.dumps(objets,indent=4,sort_keys=True)
+		print(output)
+		fa.write(output)
+		if objets.get('items'):
+			ii=0
+			for line in objets['items']:
+				ii+=1
+				print('name:', line['name'])
+				print('description:', line['description'])
+				print('id:', line['id'])
+				
+				if line['metadata'].get('readOnly'):
+					if line['metadata']['readOnly'].get('reason'):
+						print(red('THIS IS A SYSTEM OBJECT'))					
+				else:
+					condition=0
+					#check here for a condition to save result	
+					#if 'S_UD' in line['name'] or 'NEW_' in line['name']:
+					#	condition=1		
+					condition=1
+					if condition==1:			
+						print(green('KEEP THIS ONE'))
+						fa.write(line['name'])
+						fa.write(';access_rule;')		
+						fa.write(line['description'])
+						fa.write(';access_rule;')			
+						fa.write(line['id'])					
+						fa.write('\n')	
+		else:
+			print(red("NO SECURITY RULES FOUND"))					
+		if ii>=999:
+			go=1
+			offset+=ii-1
+		else:
+			go=0	
+	print(yellow("Step - 2 : OK DONE Security rules saved into output_access_rules.txt",bold=True))	
+	print('==========================================================================================')	
+	print()				
+	fa.close()		
+	print(green("ALL DONE",bold=True))	
 	
 	
