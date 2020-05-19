@@ -38,7 +38,7 @@ max_objects=500 #max number of object to send to FMC in a single POST Call
 new_auth_token=[]#as global variable in order to make it easily updatable 
 new_auth_token.append("zzz") 
 existing_name_list=[] # List of existing names into FMC 
-limit=10000 #number of object to retrieve from FMC in a single GET cal
+limit=1100 #number of object to retrieve from FMC in a single GET cal
 go_create_object=1 # for debuggin 1=send new object to FMC  0=dont
 
 # Locate the directory containing this file and the repository root.

@@ -30,8 +30,7 @@ from pprint import pprint, pformat
 from pathlib import Path
 from crayons import blue, green, white, red, yellow,magenta, cyan
 
-acp_name="PAT_Access_Control_Policy"
-limit=10000 # number of object to retreive in one object request
+limit=1100 # number of object to retreive in one object request
 new_auth_token=[] #as global variable in order to make it easily updatable 
 new_auth_token.append("zzz") 
 

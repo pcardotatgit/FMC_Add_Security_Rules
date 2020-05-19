@@ -29,8 +29,6 @@ from pprint import pprint, pformat
 from pathlib import Path
 from crayons import blue, green, white, red, yellow,magenta, cyan
 
-#acp="PAT_Access_Control_Policy"
-
 def generate_fmc_token(host,port,username,password,version):
 	r = None
 	headers = {'Content-Type': 'application/json'}

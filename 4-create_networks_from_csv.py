@@ -42,7 +42,7 @@ sys.path.insert(0, str(repository_root))
 
 csv_file_to_read= "network_objects.csv"
 max_objects=500 #max number of object to send to FMC in a single POST Call
-limit=10000 #number of object to retrieve from FMC in a single GET cal
+limit=1100 #number of object to retrieve from FMC in a single GET cal
 existing_name_list=[] # List of existing names into FMC 
 new_auth_token=[]#as global variable in order to make it easily updatable 
 new_auth_token.append("zzz") 

@@ -17,7 +17,7 @@ IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied.
 
 What is this :
-	This script creates single access control policy
+	This script is an example of creation of a single access control policy
 '''
 import json
 import sys
