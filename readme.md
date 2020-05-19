@@ -119,6 +119,8 @@ For port object groups :
 - Edit the **service_object_groupss.csv** file and add into it your protocol objects groups
 - run the **python 9-create_services_groups_from_csv.py** script.
 
+Diplay and Delete port objects :
+
 - **7-fmc_get_services.py** displays all port objects FMC contains and store the result into the **service_objects.txt** file
 - **10-fmc_delete_services.py** deletes all ports objects contained into the **service_objects.txt** file
 
