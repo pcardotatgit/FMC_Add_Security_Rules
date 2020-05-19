@@ -104,28 +104,28 @@ it deletes all objects contained into the ** network_objects.txt ** file ( gener
 
 First edit the **network_groups.csv** file and add into it your network objects groups
 
-And then run the ** python 6-create_networks_groups_from_csv.py ** file
+And then run the **python 6-create_networks_groups_from_csv.py** file
 
 ### Add Protocol and Port Objects into FMC ###
 
 All the following scripts works exactly the same as the scripts used for creating network objects
 
 For single port objects :
- Edit the **service_objects.csv** file and add into it your single protocol and port objects
- Run the ** python 8-create_services_from_csv.py ** script
+- Edit the **service_objects.csv** file and add into it your single protocol and port objects
+- Run the **python 8-create_services_from_csv.py** script
 
 For port object groups :
 
- Edit the **service_object_groupss.csv** file and add into it your protocol objects groups
- run the ** python 9-create_services_groups_from_csv.py ** script.
+- Edit the **service_object_groupss.csv** file and add into it your protocol objects groups
+- run the **python 9-create_services_groups_from_csv.py** script.
 
- **7-fmc_get_services.py** displays all port objects FMC contains and store the result into the **service_objects.txt** file
- **10-fmc_delete_services.py** deletes all ports objects contained into the **service_objects.txt** file
+-**7-fmc_get_services.py** displays all port objects FMC contains and store the result into the **service_objects.txt** file
+-**10-fmc_delete_services.py** deletes all ports objects contained into the **service_objects.txt** file
 
 ### Access Control Policies and Security Rules ###
 
- **11-fmc_get_access_control_policies.py** displays all existing Access Control Policies
- **12-create_an_acp.py** creates and Access Control Policy
- **13-fmc_get_access_rules.py** displays all Security Rules contained into a ACP
- **14-create_a_single_security_rule_in_acp.py** Creates a single security rule into an ACP
+-**11-fmc_get_access_control_policies.py** displays all existing Access Control Policies
+-**12-create_an_acp.py** creates and Access Control Policy
+-**13-fmc_get_access_rules.py** displays all Security Rules contained into a ACP
+-**14-create_a_single_security_rule_in_acp.py** Creates a single security rule into an ACP
  
