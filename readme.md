@@ -119,13 +119,13 @@ For port object groups :
 - Edit the **service_object_groupss.csv** file and add into it your protocol objects groups
 - run the **python 9-create_services_groups_from_csv.py** script.
 
--**7-fmc_get_services.py** displays all port objects FMC contains and store the result into the **service_objects.txt** file
--**10-fmc_delete_services.py** deletes all ports objects contained into the **service_objects.txt** file
+- **7-fmc_get_services.py** displays all port objects FMC contains and store the result into the **service_objects.txt** file
+- **10-fmc_delete_services.py** deletes all ports objects contained into the **service_objects.txt** file
 
 ### Access Control Policies and Security Rules ###
 
--**11-fmc_get_access_control_policies.py** displays all existing Access Control Policies
--**12-create_an_acp.py** creates and Access Control Policy
--**13-fmc_get_access_rules.py** displays all Security Rules contained into a ACP
--**14-create_a_single_security_rule_in_acp.py** Creates a single security rule into an ACP
+- **11-fmc_get_access_control_policies.py** displays all existing Access Control Policies
+- **12-create_an_acp.py** creates and Access Control Policy
+- **13-fmc_get_access_rules.py** displays all Security Rules contained into a ACP
+- **14-create_a_single_security_rule_in_acp.py** Creates a single security rule into an ACP
  
